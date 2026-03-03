@@ -153,7 +153,7 @@ export function TestimonialsSection(): JSX.Element {
                 <div className="flex flex-col justify-center">
                   <Quote className="mb-4 h-8 w-8 text-white/20" />
                   <blockquote className="mb-6 text-lg leading-relaxed text-white/80 sm:text-xl">
-                    "{testimonials[currentIndex].quote}"
+                    &quot;{testimonials[currentIndex].quote}&quot;
                   </blockquote>
                   {/* Rating */}
                   <div className="flex gap-1">
