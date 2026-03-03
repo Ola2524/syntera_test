@@ -1,10 +1,18 @@
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import { ReactQueryProvider } from "@/components/ReactQueryProvider";
 
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-inter",
+});
+
 export const metadata: Metadata = {
-  title: "o-mohamed-mmb-mkcldc",
-  description: "Next.js app with TypeScript and Tailwind CSS",
+  title: "Apex GT | Premium Luxury Sports Car",
+  description:
+    "Experience the pinnacle of automotive excellence. The Apex GT combines cutting-edge technology with timeless design.",
 };
 
 export default function RootLayout({
@@ -13,8 +21,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className="antialiased">
+    <html lang="en" className="dark">
+      <body className={`${inter.variable} font-sans antialiased`}>
         <ReactQueryProvider>{children}</ReactQueryProvider>
       </body>
     </html>
