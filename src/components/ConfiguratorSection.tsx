@@ -75,7 +75,7 @@ export function ConfiguratorSection(): JSX.Element {
   }, [selectedColor]);
 
   return (
-    <section ref={sectionRef} className="relative py-24 sm:py-32">
+    <section id="configurator" ref={sectionRef} className="relative py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-6 sm:px-12 lg:px-24">
         {/* Section Header */}
         <div className="mb-12 text-center">
@@ -173,3 +173,4 @@ export function ConfiguratorSection(): JSX.Element {
     </section>
   );
 }
+
