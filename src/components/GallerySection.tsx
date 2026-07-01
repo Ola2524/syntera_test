@@ -140,7 +140,7 @@ export function GallerySection(): JSX.Element {
   };
 
   return (
-    <section className="relative py-24 sm:py-32">
+    <section id="gallery" className="relative py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-6 sm:px-12 lg:px-24">
         {/* Section Header */}
         <div className="mb-12 flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-end">
@@ -193,3 +193,4 @@ export function GallerySection(): JSX.Element {
     </section>
   );
 }
+

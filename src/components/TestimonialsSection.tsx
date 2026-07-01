@@ -105,7 +105,7 @@ export function TestimonialsSection(): JSX.Element {
   };
 
   return (
-    <section ref={sectionRef} className="relative py-24 sm:py-32">
+    <section id="testimonials" ref={sectionRef} className="relative py-24 sm:py-32">
       {/* Background */}
       <div className="absolute inset-0 bg-gradient-to-b from-background via-muted/20 to-background" />
 
@@ -217,3 +217,4 @@ export function TestimonialsSection(): JSX.Element {
     </section>
   );
 }
+
