@@ -1,12 +1,8 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent } from "@/components/ui/card";
+import { BookingForm } from "@/components/BookingForm";
 import {
-  Send,
   MapPin,
   Phone,
   Mail,
@@ -18,14 +14,6 @@ import {
 
 export function FooterSection(): JSX.Element {
   const [isVisible, setIsVisible] = useState(false);
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    message: "",
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
   const sectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -45,30 +33,6 @@ export function FooterSection(): JSX.Element {
 
     return () => observer.disconnect();
   }, []);
-
-  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
-    // Simulate form submission
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-
-    setIsSubmitting(false);
-    setIsSubmitted(true);
-    setFormData({ name: "", email: "", phone: "", message: "" });
-
-    // Reset success message after 5 seconds
-    setTimeout(() => setIsSubmitted(false), 5000);
-  };
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ): void => {
-    setFormData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
-  };
 
   return (
     <footer ref={sectionRef} id="contact" className="relative">
@@ -151,136 +115,7 @@ export function FooterSection(): JSX.Element {
                   : "translate-y-8 opacity-0"
               }`}
             >
-              <Card className="glass border-white/10">
-                <CardContent className="p-6 sm:p-8">
-                  {isSubmitted ? (
-                    <div className="py-12 text-center">
-                      <div className="mb-4 flex justify-center">
-                        <div className="flex h-16 w-16 items-center justify-center border border-white/20 bg-white/10">
-                          <Send className="h-8 w-8 text-white" />
-                        </div>
-                      </div>
-                      <h3 className="mb-2 text-xl font-semibold text-white">
-                        Message Sent!
-                      </h3>
-                      <p className="text-white/60">
-                        Thank you for your interest. We&apos;ll be in touch
-                        soon.
-                      </p>
-                    </div>
-                  ) : (
-                    <form onSubmit={handleSubmit} className="space-y-6">
-                      <div className="grid gap-6 sm:grid-cols-2">
-                        <div>
-                          <label
-                            htmlFor="name"
-                            className="mb-2 block text-sm font-medium text-white/80"
-                          >
-                            Full Name
-                          </label>
-                          <Input
-                            id="name"
-                            name="name"
-                            type="text"
-                            required
-                            value={formData.name}
-                            onChange={handleChange}
-                            placeholder="John Doe"
-                            className="border-white/20 bg-white/5 text-white placeholder:text-white/30 focus:border-white/40"
-                          />
-                        </div>
-                        <div>
-                          <label
-                            htmlFor="email"
-                            className="mb-2 block text-sm font-medium text-white/80"
-                          >
-                            Email Address
-                          </label>
-                          <Input
-                            id="email"
-                            name="email"
-                            type="email"
-                            required
-                            value={formData.email}
-                            onChange={handleChange}
-                            placeholder="john@example.com"
-                            className="border-white/20 bg-white/5 text-white placeholder:text-white/30 focus:border-white/40"
-                          />
-                        </div>
-                      </div>
-                      <div>
-                        <label
-                          htmlFor="phone"
-                          className="mb-2 block text-sm font-medium text-white/80"
-                        >
-                          Phone Number
-                        </label>
-                        <Input
-                          id="phone"
-                          name="phone"
-                          type="tel"
-                          value={formData.phone}
-                          onChange={handleChange}
-                          placeholder="+1 (555) 000-0000"
-                          className="border-white/20 bg-white/5 text-white placeholder:text-white/30 focus:border-white/40"
-                        />
-                      </div>
-                      <div>
-                        <label
-                          htmlFor="message"
-                          className="mb-2 block text-sm font-medium text-white/80"
-                        >
-                          Message
-                        </label>
-                        <Textarea
-                          id="message"
-                          name="message"
-                          rows={4}
-                          value={formData.message}
-                          onChange={handleChange}
-                          placeholder="Tell us about your interest in the Apex GT..."
-                          className="border-white/20 bg-white/5 text-white placeholder:text-white/30 focus:border-white/40 resize-none"
-                        />
-                      </div>
-                      <Button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className="w-full bg-white text-black hover:bg-white/90 disabled:opacity-50"
-                      >
-                        {isSubmitting ? (
-                          <span className="flex items-center gap-2">
-                            <svg
-                              className="h-4 w-4 animate-spin"
-                              viewBox="0 0 24 24"
-                            >
-                              <circle
-                                className="opacity-25"
-                                cx="12"
-                                cy="12"
-                                r="10"
-                                stroke="currentColor"
-                                strokeWidth="4"
-                                fill="none"
-                              />
-                              <path
-                                className="opacity-75"
-                                fill="currentColor"
-                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                              />
-                            </svg>
-                            Sending...
-                          </span>
-                        ) : (
-                          <span className="flex items-center gap-2">
-                            <Send className="h-4 w-4" />
-                            Send Message
-                          </span>
-                        )}
-                      </Button>
-                    </form>
-                  )}
-                </CardContent>
-              </Card>
+              <BookingForm />
             </div>
           </div>
         </div>
@@ -310,4 +145,6 @@ export function FooterSection(): JSX.Element {
     </footer>
   );
 }
+
+
 
