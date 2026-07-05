@@ -1,282 +1,411 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Link from "next/link"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { z } from "zod"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Label } from "@/components/ui/label"
-import { useToast } from "@/hooks/use-toast"
-import { cn } from "@/lib/utils"
-import { ArrowLeft, Loader2 } from "lucide-react"
+import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
+import { ArrowLeft, ArrowRight, Check, Lock, Mail } from "lucide-react";
 
-// Zod schemas
-const emailSchema = z.object({
+/**
+ * Zod validation schema for the login form.
+ *
+ * - `email`: must be a valid email address.
+ * - `password`: must be at least 1 character (required).
+ */
+const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
-})
-
-const passwordSchema = z.object({
   password: z.string().min(1, "Password is required"),
-})
+});
 
-type EmailFormData = z.infer<typeof emailSchema>
-type PasswordFormData = z.infer<typeof passwordSchema>
+/** Inferred TypeScript type from the Zod login schema. */
+type LoginFormData = z.infer<typeof loginSchema>;
 
-export default function LoginPage() {
-  const [stage, setStage] = useState(0)
-  const [email, setEmail] = useState("")
-  const [loading, setLoading] = useState(false)
-  const { toast } = useToast()
+/** A single stage definition for the visual stage indicator. */
+interface LoginStage {
+  id: number;
+  label: string;
+}
 
-  // Stage 1 form
-  const emailForm = useForm<EmailFormData>({
-    resolver: zodResolver(emailSchema),
-    defaultValues: { email: "" },
-  })
+/** The two login stages displayed in the progress indicator. */
+const LOGIN_STAGES: LoginStage[] = [
+  { id: 1, label: "Email" },
+  { id: 2, label: "Password" },
+];
 
-  // Stage 2 form
-  const passwordForm = useForm<PasswordFormData>({
-    resolver: zodResolver(passwordSchema),
-    defaultValues: { password: "" },
-  })
+/**
+ * LoginPage — two-stage authentication form for the Apex GT car configurator.
+ *
+ * Features:
+ * - Stage 1: Email entry — user enters their email and clicks "Continue"
+ *   to advance to Stage 2.
+ * - Stage 2: Password entry — user enters their password and clicks "Sign In"
+ *   to submit the form. A "Back" button returns to Stage 1, preserving the
+ *   email value.
+ * - A visual stage indicator (similar to the Navbar's progress tracker) showing
+ *   which stage is active, with completed stages showing a checkmark.
+ * - Form state managed via `react-hook-form` with `zodResolver` for validation.
+ * - On successful login, shows a success toast and redirects to `/`.
+ * - On error, shows an error toast with the API error message and stays on Stage 2.
+ * - Dark luxury theme matching the Navbar: dark/transparent backgrounds, white
+ *   text with opacity variants, `border-white/10`, backdrop blur.
+ *
+ * @returns The rendered login page component.
+ */
+export default function LoginPage(): JSX.Element {
+  const router = useRouter();
+  const { toast } = useToast();
 
-  // Stage 1 handler — submit email
-  const onEmailSubmit = async (data: EmailFormData) => {
-    setLoading(true)
+  // 1 = Stage 1 (email), 2 = Stage 2 (password)
+  const [stage, setStage] = useState<number>(1);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    trigger,
+    formState: { errors },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    mode: "onBlur",
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+
+  /** The current email value, used to display a read-only summary on Stage 2. */
+  const emailValue = watch("email");
+
+  /**
+   * Advance from Stage 1 to Stage 2 after validating the email field.
+   * If the email is invalid, the form error will be displayed and the user
+   * will remain on Stage 1.
+   */
+  const handleContinueToStage2 = async (): Promise<void> => {
+    const isEmailValid = await trigger("email");
+    if (isEmailValid) {
+      setStage(2);
+    }
+  };
+
+  /** Return to Stage 1, preserving the email value in form state. */
+  const handleBackToStage1 = (): void => {
+    setStage(1);
+  };
+
+  /**
+   * Submit the login form to the API.
+   *
+   * Sends a POST request to `/api/auth/login` with the email and password.
+   * On success (200), shows a success toast and redirects to `/`.
+   * On error (400/401/500), shows an error toast with the error message.
+   *
+   * @param data - The validated form data containing email and password.
+   */
+  const onSubmit = async (data: LoginFormData): Promise<void> => {
+    setIsSubmitting(true);
+
     try {
-      const res = await fetch("/api/auth/login", {
+      const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: data.email }),
-      })
+        body: JSON.stringify({
+          email: data.email,
+          password: data.password,
+        }),
+      });
 
-      const json = await res.json()
+      const responseBody = await response.json();
 
-      if (!res.ok) {
+      if (!response.ok) {
+        const errorMessage =
+          responseBody?.error || "Something went wrong. Please try again.";
         toast({
           variant: "destructive",
-          title: "Error",
-          description: json.error || "Something went wrong. Please try again.",
-        })
-        return
+          title: "Login failed",
+          description: errorMessage,
+        });
+        return;
       }
 
-      // Success — store email and advance to Stage 2
-      setEmail(data.email)
-      setStage(1)
+      // Success — show toast and redirect to home
+      toast({
+        title: "Welcome back",
+        description: "You have been signed in successfully.",
+      });
+
+      router.push("/");
     } catch {
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "Network error. Please check your connection and try again.",
-      })
+        title: "Login failed",
+        description: "A network error occurred. Please try again.",
+      });
     } finally {
-      setLoading(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
-  // Stage 2 handler — submit password
-  const onPasswordSubmit = async (data: PasswordFormData) => {
-    setLoading(true)
-    try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password: data.password }),
-      })
-
-      const json = await res.json()
-
-      if (!res.ok) {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: json.error || "Something went wrong. Please try again.",
-        })
-        return
-      }
-
-      // Success — show toast
-      toast({
-        title: "Login successful!",
-        description: "Welcome back to Apex GT.",
-      })
-    } catch {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Network error. Please check your connection and try again.",
-      })
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  // Back button — return to Stage 1
-  const handleBack = () => {
-    setStage(0)
-    passwordForm.reset()
-  }
+  /**
+   * Determine the status of a given stage based on the current stage.
+   * @param stageIndex - The zero-based index of the stage.
+   * @returns "completed" | "in_progress" | "pending"
+   */
+  const getStageStatus = (
+    stageIndex: number,
+  ): "completed" | "in_progress" | "pending" => {
+    if (stageIndex < stage - 1) return "completed";
+    if (stageIndex === stage - 1) return "in_progress";
+    return "pending";
+  };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-neutral-950 px-4 py-12">
+    <main
+      className="flex min-h-screen items-center justify-center px-4 pt-24 pb-12"
+      role="main"
+    >
       <div className="w-full max-w-md">
-        {/* Back to home link */}
-        <Link
-          href="/"
-          className="mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-white"
+        {/* Stage Indicator */}
+        <div
+          className="mb-8 flex items-center justify-center gap-2"
+          aria-label="Login progress"
         >
-          <ArrowLeft className="h-4 w-4" />
-          Back to home
-        </Link>
+          {LOGIN_STAGES.map((loginStage, index) => {
+            const status = getStageStatus(index);
+            return (
+              <div key={loginStage.id} className="flex items-center gap-2">
+                {/* Stage circle */}
+                <div
+                  className={cn(
+                    "flex h-8 w-8 items-center justify-center rounded-full border text-xs font-semibold transition-all duration-300",
+                    status === "completed" &&
+                      "border-white/20 bg-white/15 text-white",
+                    status === "in_progress" &&
+                      "border-white/40 bg-white/10 text-white ring-2 ring-white/20",
+                    status === "pending" &&
+                      "border-white/10 bg-transparent text-white/30",
+                  )}
+                  aria-label={`Stage ${index + 1}: ${loginStage.label} — ${status.replace("_", " ")}`}
+                >
+                  {status === "completed" ? (
+                    <Check className="h-4 w-4" />
+                  ) : (
+                    index + 1
+                  )}
+                </div>
 
-        <Card className="border-white/10 bg-neutral-900/50 backdrop-blur">
-          <CardHeader className="space-y-1">
-            {/* Stage indicator */}
-            <div className="mb-2 flex items-center gap-2">
-              <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                Step {stage + 1} of 2
-              </span>
-              <div className="flex h-1 flex-1 gap-1">
-                <div
+                {/* Stage label */}
+                <span
                   className={cn(
-                    "h-full flex-1 rounded-full transition-colors",
-                    stage >= 0 ? "bg-white" : "bg-white/10"
+                    "text-xs font-medium transition-colors duration-300",
+                    status === "pending" ? "text-white/30" : "text-white/70",
                   )}
-                />
-                <div
-                  className={cn(
-                    "h-full flex-1 rounded-full transition-colors",
-                    stage >= 1 ? "bg-white" : "bg-white/10"
-                  )}
-                />
+                >
+                  {loginStage.label}
+                </span>
+
+                {/* Connector line between stages */}
+                {index < LOGIN_STAGES.length - 1 && (
+                  <div
+                    className={cn(
+                      "mx-1 h-px w-8 transition-colors duration-300",
+                      status === "completed" ? "bg-white/40" : "bg-white/10",
+                    )}
+                  />
+                )}
               </div>
-            </div>
+            );
+          })}
+        </div>
 
-            {stage === 0 ? (
-              <>
-                <CardTitle className="text-2xl font-bold text-white">
-                  Welcome back
-                </CardTitle>
-                <CardDescription className="text-muted-foreground">
-                  Enter your email to sign in to your account
-                </CardDescription>
-              </>
-            ) : (
-              <>
-                <CardTitle className="text-2xl font-bold text-white">
-                  Enter your password
-                </CardTitle>
-                <CardDescription className="text-muted-foreground">
-                  {email}
-                </CardDescription>
-              </>
-            )}
+        {/* Login Card */}
+        <Card className="border-white/10 bg-background/70 backdrop-blur-xl">
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-2xl font-bold tracking-tight text-white">
+              {stage === 1 ? "Welcome back" : "Enter your password"}
+            </CardTitle>
+            <CardDescription className="text-white/60">
+              {stage === 1
+                ? "Enter your email to sign in to your Apex GT account."
+                : "Confirm your password to complete the sign-in."}
+            </CardDescription>
           </CardHeader>
 
           <CardContent>
-            {stage === 0 ? (
-              // Stage 1 — Email Entry
-              <form
-                onSubmit={emailForm.handleSubmit(onEmailSubmit)}
-                className="space-y-4"
-              >
+            <form
+              onSubmit={handleSubmit(onSubmit)}
+              className="space-y-4"
+              noValidate
+            >
+              {/* Stage 1: Email Field */}
+              {stage === 1 && (
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-white">
+                  <Label
+                    htmlFor="email"
+                    className="text-white/70"
+                  >
                     Email
                   </Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="you@example.com"
-                    autoComplete="email"
-                    disabled={loading}
-                    className="border-white/10 bg-neutral-950 text-white placeholder:text-muted-foreground/50 focus-visible:ring-white/20"
-                    {...emailForm.register("email")}
-                  />
-                  {emailForm.formState.errors.email && (
-                    <p className="text-sm text-red-500">
-                      {emailForm.formState.errors.email.message}
+                  <div className="relative">
+                    <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="you@example.com"
+                      autoComplete="email"
+                      autoFocus
+                      aria-invalid={!!errors.email}
+                      aria-describedby={errors.email ? "email-error" : undefined}
+                      className="border-white/10 bg-white/5 pl-9 text-white placeholder:text-white/30 focus-visible:border-white/20 focus-visible:ring-white/20"
+                      {...register("email")}
+                    />
+                  </div>
+                  {errors.email && (
+                    <p
+                      id="email-error"
+                      className="text-sm text-red-400"
+                      role="alert"
+                    >
+                      {errors.email.message}
                     </p>
                   )}
                 </div>
+              )}
 
-                <Button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full bg-white text-neutral-950 hover:bg-white/90"
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      Checking...
-                    </>
-                  ) : (
-                    "Continue"
-                  )}
-                </Button>
-              </form>
-            ) : (
-              // Stage 2 — Password Entry
-              <form
-                onSubmit={passwordForm.handleSubmit(onPasswordSubmit)}
-                className="space-y-4"
-              >
-                <div className="space-y-2">
-                  <Label htmlFor="password" className="text-white">
-                    Password
-                  </Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="Enter your password"
-                    autoComplete="current-password"
-                    autoFocus
-                    disabled={loading}
-                    className="border-white/10 bg-neutral-950 text-white placeholder:text-muted-foreground/50 focus-visible:ring-white/20"
-                    {...passwordForm.register("password")}
-                  />
-                  {passwordForm.formState.errors.password && (
-                    <p className="text-sm text-red-500">
-                      {passwordForm.formState.errors.password.message}
-                    </p>
-                  )}
+              {/* Stage 2: Password Field */}
+              {stage === 2 && (
+                <div className="space-y-4">
+                  {/* Read-only email summary */}
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="email-readonly"
+                      className="text-white/70"
+                    >
+                      Email
+                    </Label>
+                    <div className="flex items-center justify-between rounded-md border border-white/10 bg-white/5 px-3 py-2">
+                      <span className="flex items-center gap-2 text-sm text-white/80">
+                        <Mail className="h-4 w-4 text-white/40" />
+                        {emailValue}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={handleBackToStage1}
+                        className="text-xs font-medium text-white/50 transition-colors hover:text-white"
+                      >
+                        Change
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Password input */}
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="password"
+                      className="text-white/70"
+                    >
+                      Password
+                    </Label>
+                    <div className="relative">
+                      <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
+                      <Input
+                        id="password"
+                        type="password"
+                        placeholder="Enter your password"
+                        autoComplete="current-password"
+                        autoFocus
+                        aria-invalid={!!errors.password}
+                        aria-describedby={
+                          errors.password ? "password-error" : undefined
+                        }
+                        className="border-white/10 bg-white/5 pl-9 text-white placeholder:text-white/30 focus-visible:border-white/20 focus-visible:ring-white/20"
+                        {...register("password")}
+                      />
+                    </div>
+                    {errors.password && (
+                      <p
+                        id="password-error"
+                        className="text-sm text-red-400"
+                        role="alert"
+                      >
+                        {errors.password.message}
+                      </p>
+                    )}
+                  </div>
                 </div>
+              )}
 
-                <Button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full bg-white text-neutral-950 hover:bg-white/90"
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      Signing in...
-                    </>
-                  ) : (
-                    "Sign in"
-                  )}
-                </Button>
-
+              {/* Stage 1: Continue button */}
+              {stage === 1 && (
                 <Button
                   type="button"
-                  variant="ghost"
-                  onClick={handleBack}
-                  disabled={loading}
-                  className="w-full text-muted-foreground hover:text-white"
+                  onClick={handleContinueToStage2}
+                  className="w-full border-white/20 bg-white/10 text-white hover:bg-white/20 hover:text-white"
+                  variant="outline"
                 >
-                  <ArrowLeft className="h-4 w-4" />
-                  Back
+                  Continue
+                  <ArrowRight className="h-4 w-4" />
                 </Button>
-              </form>
-            )}
+              )}
+
+              {/* Stage 2: Back + Sign In buttons */}
+              {stage === 2 && (
+                <div className="flex gap-3">
+                  <Button
+                    type="button"
+                    onClick={handleBackToStage1}
+                    variant="ghost"
+                    aria-label="Go back to email entry"
+                    className="border border-white/10 text-white/60 hover:bg-white/10 hover:text-white"
+                  >
+                    <ArrowLeft className="h-4 w-4" />
+                    Back
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="flex-1 border-white/20 bg-white/10 text-white hover:bg-white/20 hover:text-white"
+                    variant="outline"
+                  >
+                    {isSubmitting ? "Signing in..." : "Sign In"}
+                    {!isSubmitting && <ArrowRight className="h-4 w-4" />}
+                  </Button>
+                </div>
+              )}
+            </form>
           </CardContent>
+
+          <CardFooter className="flex flex-col items-center gap-2">
+            <p className="text-sm text-white/50">
+              Don&apos;t have an account?{" "}
+              <Link
+                href="/register"
+                className="font-medium text-white/80 underline-offset-4 transition-colors hover:text-white hover:underline"
+              >
+                Sign up
+              </Link>
+            </p>
+          </CardFooter>
         </Card>
       </div>
-    </div>
-  )
+    </main>
+  );
 }
+
 
