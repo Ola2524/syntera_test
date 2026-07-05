@@ -33,6 +33,8 @@ const NAV_LINKS: NavLink[] = [
   { label: "About", href: "/about" },
   { label: "Specs", href: "#specs" },
   { label: "Contact", href: "#contact" },
+  { label: "Privacy Policy", href: "/privacy" },
+  { label: "Terms", href: "/terms" },
 ];
 
 /** The two configurator stages displayed in the progress tracker. */
@@ -47,7 +49,7 @@ const STAGES: ProgressStage[] = [
  * Features:
  * - Sticky/fixed positioning with backdrop blur and semi-transparent background
  * - Brand logo "APEX GT" linking to the home page
- * - Desktop navigation links (Home, About, Specs, Contact)
+ * - Desktop navigation links (Home, About, Specs, Contact, Privacy Policy, Terms)
  * - A compact two-stage "Build Progress" tracker using `useState`:
  *     • 0 → Stage 1 ("Configure") in progress
  *     • 1 → Stage 2 ("Review") in progress
@@ -355,4 +357,6 @@ export function Navbar(): JSX.Element {
     </header>
   );
 }
+
+
 
