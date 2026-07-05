@@ -4,6 +4,7 @@ import "./globals.css";
 import { ReactQueryProvider } from "@/components/ReactQueryProvider";
 import { Navbar } from "@/components/Navbar";
 import { Toaster } from "@/components/ui/toaster";
+import { CartProvider } from "@/context/CartContext";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -26,14 +27,18 @@ export default function RootLayout({
     <html lang="en" className="dark">
       <body className={`${inter.variable} font-sans antialiased`}>
         <ReactQueryProvider>
-          <Navbar />
-          {children}
-          <Toaster />
+          <CartProvider>
+            <Navbar />
+            {children}
+            <Toaster />
+          </CartProvider>
         </ReactQueryProvider>
       </body>
     </html>
   );
 }
+
+
 
 
 

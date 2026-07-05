@@ -8,8 +8,12 @@ import {
   SheetContent,
   SheetTrigger,
   SheetClose,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
 } from "@/components/ui/sheet";
-import { Menu } from "lucide-react";
+import { Menu, ShoppingCart, Trash2, Minus, Plus } from "lucide-react";
+import { useCart } from "@/context/CartContext";
 
 /**
  * Navigation link configuration for the Navbar.
@@ -44,6 +48,8 @@ const NAV_LINKS: NavLink[] = [
  */
 export function Navbar(): JSX.Element {
   const [isOpen, setIsOpen] = useState(false);
+  const [cartOpen, setCartOpen] = useState(false);
+  const { items, totalItems, subtotal, removeItem, updateQuantity, clearCart } = useCart();
 
   return (
     <nav
@@ -90,6 +96,142 @@ export function Navbar(): JSX.Element {
         >
           Book Test Drive
         </Button>
+
+        {/* Cart Button & Drawer */}
+        <Sheet open={cartOpen} onOpenChange={setCartOpen}>
+          <SheetTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="relative text-white hover:bg-white/10 hover:text-white"
+              aria-label="Open cart"
+            >
+              <ShoppingCart className="h-5 w-5" />
+              {totalItems > 0 && (
+                <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-white px-1 text-[10px] font-bold text-black">
+                  {totalItems}
+                </span>
+              )}
+            </Button>
+          </SheetTrigger>
+          <SheetContent
+            side="right"
+            className="flex w-full flex-col border-l border-white/10 bg-background sm:max-w-md"
+          >
+            <SheetHeader>
+              <SheetTitle className="text-white">Your Cart</SheetTitle>
+              <SheetDescription>
+                {totalItems} item(s)
+              </SheetDescription>
+            </SheetHeader>
+
+            {items.length === 0 ? (
+              <div className="flex flex-1 flex-col items-center justify-center gap-2">
+                <p className="text-sm font-medium text-white">Your cart is empty</p>
+                <p className="text-sm text-white/50">
+                  Add a configured Apex GT to get started.
+                </p>
+              </div>
+            ) : (
+              <>
+                <div className="flex flex-col gap-4 overflow-y-auto py-4">
+                  {items.map((item) => (
+                    <div
+                      key={item.id}
+                      className="flex gap-3 rounded-lg border border-white/10 p-3"
+                    >
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        className="h-16 w-16 rounded border border-white/10 object-cover"
+                      />
+                      <div className="flex flex-1 flex-col gap-1">
+                        <p className="text-sm font-medium text-white">
+                          {item.name}
+                        </p>
+                        <div className="flex items-center gap-2">
+                          <div
+                            className="inline-block h-3 w-3 rounded-full border border-white/20"
+                            style={{ backgroundColor: item.colorHex }}
+                          />
+                          <span className="text-xs text-white/50">
+                            {item.color}
+                          </span>
+                        </div>
+                        <p className="text-sm font-medium text-white/70">
+                          {item.price.toLocaleString("en-US", {
+                            style: "currency",
+                            currency: "USD",
+                          })}
+                        </p>
+                        <div className="mt-1 flex items-center gap-2">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 text-white hover:bg-white/10 hover:text-white"
+                            onClick={() =>
+                              updateQuantity(item.id, item.quantity - 1)
+                            }
+                            aria-label="Decrease quantity"
+                          >
+                            <Minus className="h-3 w-3" />
+                          </Button>
+                          <span className="min-w-6 text-center text-sm font-medium text-white">
+                            {item.quantity}
+                          </span>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 text-white hover:bg-white/10 hover:text-white"
+                            onClick={() =>
+                              updateQuantity(item.id, item.quantity + 1)
+                            }
+                            aria-label="Increase quantity"
+                          >
+                            <Plus className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="ml-auto h-7 w-7 text-white/50 hover:text-red-400"
+                            onClick={() => removeItem(item.id)}
+                            aria-label="Remove item"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="border-t border-white/10 pt-4">
+                  <div className="mb-4 flex items-center justify-between">
+                    <span className="text-sm font-medium text-white/70">
+                      Subtotal
+                    </span>
+                    <span className="text-sm font-bold text-white">
+                      {subtotal.toLocaleString("en-US", {
+                        style: "currency",
+                        currency: "USD",
+                      })}
+                    </span>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    className="mb-2 w-full justify-start text-white/50 hover:text-white"
+                    onClick={clearCart}
+                  >
+                    Clear Cart
+                  </Button>
+                  <Button className="w-full bg-white text-black hover:bg-white/90">
+                    Checkout
+                  </Button>
+                </div>
+              </>
+            )}
+          </SheetContent>
+        </Sheet>
 
         {/* Mobile Hamburger Menu */}
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -159,4 +301,7 @@ export function Navbar(): JSX.Element {
     </nav>
   );
 }
+
+
+
 
