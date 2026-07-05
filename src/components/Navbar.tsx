@@ -35,6 +35,7 @@ const NAV_LINKS: NavLink[] = [
   { label: "Contact", href: "#contact" },
   { label: "Privacy Policy", href: "/privacy" },
   { label: "Terms", href: "/terms" },
+  { label: "Login", href: "/login" },
 ];
 
 /** The two configurator stages displayed in the progress tracker. */
@@ -357,6 +358,7 @@ export function Navbar(): JSX.Element {
     </header>
   );
 }
+
 
 
 
