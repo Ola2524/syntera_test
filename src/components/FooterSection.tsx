@@ -15,6 +15,7 @@ import {
   Youtube,
   Linkedin,
 } from "lucide-react";
+import Link from "next/link";
 
 export function FooterSection(): JSX.Element {
   const [isVisible, setIsVisible] = useState(false);
@@ -294,15 +295,15 @@ export function FooterSection(): JSX.Element {
               © 2025 Apex GT. All rights reserved.
             </p>
             <div className="flex gap-6 text-sm text-white/40">
-              <a href="/about" className="transition-colors hover:text-white">
+              <Link href="/about" className="transition-colors hover:text-white">
                 About
-              </a>
-              <a href="#" className="transition-colors hover:text-white">
+              </Link>
+              <Link href="/privacy" className="transition-colors hover:text-white">
                 Privacy Policy
-              </a>
-              <a href="#" className="transition-colors hover:text-white">
+              </Link>
+              <Link href="/terms" className="transition-colors hover:text-white">
                 Terms of Service
-              </a>
+              </Link>
             </div>
           </div>
         </div>
@@ -310,4 +311,6 @@ export function FooterSection(): JSX.Element {
     </footer>
   );
 }
+
+
 

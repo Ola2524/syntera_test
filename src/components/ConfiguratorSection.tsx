@@ -4,7 +4,9 @@ import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Check } from "lucide-react";
+import { Check, ShoppingCart } from "lucide-react";
+import { useCart } from "@/context/CartContext";
+import { useToast } from "@/hooks/use-toast";
 
 interface CarColor {
   name: string;
@@ -51,6 +53,9 @@ export function ConfiguratorSection(): JSX.Element {
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef<HTMLDivElement>(null);
 
+  const { addItem } = useCart();
+  const { toast } = useToast();
+
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -73,6 +78,21 @@ export function ConfiguratorSection(): JSX.Element {
   useEffect(() => {
     setIsImageLoaded(false);
   }, [selectedColor]);
+
+  const handleAddToCart = () => {
+    addItem({
+      productId: "apex-gt",
+      name: "Apex GT",
+      color: selectedColor.name,
+      colorHex: selectedColor.hex,
+      image: selectedColor.image,
+      price: 185000,
+    });
+    toast({
+      title: "Added to cart",
+      description: `Apex GT in ${selectedColor.name} has been added to your cart.`,
+    });
+  };
 
   return (
     <section ref={sectionRef} className="relative py-24 sm:py-32">
@@ -161,15 +181,28 @@ export function ConfiguratorSection(): JSX.Element {
 
         {/* CTA */}
         <div
-          className={`mt-12 text-center transition-all duration-700 delay-300 ${
+          className={`mt-12 flex flex-col items-center justify-center gap-4 transition-all duration-700 delay-300 sm:flex-row ${
             isVisible ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
           }`}
         >
           <Button size="lg" className="bg-white text-black hover:bg-white/90">
             Configure Your Apex GT
           </Button>
+          <Button
+            size="lg"
+            variant="outline"
+            className="border-white/30 text-white hover:bg-white/10 hover:text-white"
+            onClick={handleAddToCart}
+          >
+            <ShoppingCart className="h-5 w-5" />
+            Add to Cart
+          </Button>
         </div>
       </div>
     </section>
   );
 }
+
+
+
+
