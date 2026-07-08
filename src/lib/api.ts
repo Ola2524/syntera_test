@@ -78,5 +78,25 @@ export const api = {
     },
   },
 
+  contact: {
+    create: (input: { name: string; email: string; phone?: string; message: string }) =>
+      fetchApi<{ data: any; message: string }>("/api/contact", {
+        method: "POST",
+        body: JSON.stringify(input),
+      }),
+
+    getAll: (params?: { status?: string; limit?: number; offset?: number }) => {
+      const searchParams = new URLSearchParams();
+      if (params?.status) searchParams.set("status", params.status);
+      if (params?.limit) searchParams.set("limit", String(params.limit));
+      if (params?.offset) searchParams.set("offset", String(params.offset));
+      const query = searchParams.toString();
+      return fetchApi<{ data: any[] }>(
+        `/api/contact${query ? `?${query}` : ""}`
+      );
+    },
+  },
+
   health: () => fetchApi<{ ok: boolean; timestamp: string }>("/api/health"),
 };
+
