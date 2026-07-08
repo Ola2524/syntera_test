@@ -1,7 +1,7 @@
 import { User, CreateUserInput, UpdateUserInput } from "@/types/user";
 import { Booking, CreateBookingInput, BookingResponse } from "@/types/booking";
 
-const API_BASE = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+const API_BASE = (process.env.NEXT_PUBLIC_APP_URL || "https://3000-83c0df10-1286-4deb-ab02-e0d3b950b480.proxy.syntera-happybox.obelion.ai/").replace(/\/+$/, "") + "/";
 
 export class ApiError extends Error {
   constructor(public status: number, message: string) {
@@ -99,4 +99,5 @@ export const api = {
 
   health: () => fetchApi<{ ok: boolean; timestamp: string }>("/api/health"),
 };
+
 
