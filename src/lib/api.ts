@@ -1,4 +1,5 @@
 import { User, CreateUserInput, UpdateUserInput } from "@/types/user";
+import { Booking, CreateBookingInput, BookingResponse } from "@/types/booking";
 
 const API_BASE = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
@@ -57,6 +58,25 @@ export const api = {
         method: "DELETE",
       }),
   },
-  
+
+  bookings: {
+    create: (input: CreateBookingInput) =>
+      fetchApi<BookingResponse>("/api/bookings", {
+        method: "POST",
+        body: JSON.stringify(input),
+      }),
+
+    getAll: (params?: { status?: string; limit?: number; offset?: number }) => {
+      const searchParams = new URLSearchParams();
+      if (params?.status) searchParams.set("status", params.status);
+      if (params?.limit) searchParams.set("limit", String(params.limit));
+      if (params?.offset) searchParams.set("offset", String(params.offset));
+      const query = searchParams.toString();
+      return fetchApi<{ data: Booking[] }>(
+        `/api/bookings${query ? `?${query}` : ""}`
+      );
+    },
+  },
+
   health: () => fetchApi<{ ok: boolean; timestamp: string }>("/api/health"),
 };
