@@ -313,10 +313,10 @@ export function FooterSection(): JSX.Element {
               <a href="/about" className="transition-colors hover:text-white">
                 About
               </a>
-              <a href="#" className="transition-colors hover:text-white">
+              <a href="/privacy" className="transition-colors hover:text-white">
                 Privacy Policy
               </a>
-              <a href="#" className="transition-colors hover:text-white">
+              <a href="/terms" className="transition-colors hover:text-white">
                 Terms of Service
               </a>
             </div>
@@ -326,6 +326,8 @@ export function FooterSection(): JSX.Element {
     </footer>
   );
 }
+
+
 
 
 
