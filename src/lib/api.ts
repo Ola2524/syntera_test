@@ -1,6 +1,7 @@
 import { User, CreateUserInput, UpdateUserInput } from "@/types/user";
+import { Booking, CreateBookingInput, BookingResponse } from "@/types/booking";
 
-const API_BASE = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+const API_BASE = (process.env.NEXT_PUBLIC_APP_URL || "https://3000-83c0df10-1286-4deb-ab02-e0d3b950b480.proxy.syntera-happybox.obelion.ai/").replace(/\/+$/, "") + "/";
 
 export class ApiError extends Error {
   constructor(public status: number, message: string) {
@@ -57,6 +58,46 @@ export const api = {
         method: "DELETE",
       }),
   },
-  
+
+  bookings: {
+    create: (input: CreateBookingInput) =>
+      fetchApi<BookingResponse>("/api/bookings", {
+        method: "POST",
+        body: JSON.stringify(input),
+      }),
+
+    getAll: (params?: { status?: string; limit?: number; offset?: number }) => {
+      const searchParams = new URLSearchParams();
+      if (params?.status) searchParams.set("status", params.status);
+      if (params?.limit) searchParams.set("limit", String(params.limit));
+      if (params?.offset) searchParams.set("offset", String(params.offset));
+      const query = searchParams.toString();
+      return fetchApi<{ data: Booking[] }>(
+        `/api/bookings${query ? `?${query}` : ""}`
+      );
+    },
+  },
+
+  contact: {
+    create: (input: { name: string; email: string; phone?: string; message: string }) =>
+      fetchApi<{ data: any; message: string }>("/api/contact", {
+        method: "POST",
+        body: JSON.stringify(input),
+      }),
+
+    getAll: (params?: { status?: string; limit?: number; offset?: number }) => {
+      const searchParams = new URLSearchParams();
+      if (params?.status) searchParams.set("status", params.status);
+      if (params?.limit) searchParams.set("limit", String(params.limit));
+      if (params?.offset) searchParams.set("offset", String(params.offset));
+      const query = searchParams.toString();
+      return fetchApi<{ data: any[] }>(
+        `/api/contact${query ? `?${query}` : ""}`
+      );
+    },
+  },
+
   health: () => fetchApi<{ ok: boolean; timestamp: string }>("/api/health"),
 };
+
+

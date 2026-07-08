@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ChevronDown } from "lucide-react";
+import { BookingForm } from "@/components/BookingForm";
 
 /**
  * HeroSection - Premium car landing page hero component
@@ -110,13 +111,7 @@ export function HeroSection(): JSX.Element {
               <ChevronDown className="ml-2 h-4 w-4 transition-transform group-hover:translate-y-1" />
             </Button>
 
-            <Button
-              size="lg"
-              variant="outline"
-              className="border-white/30 text-white hover:bg-white/10 hover:text-white"
-            >
-              Book Test Drive
-            </Button>
+            <BookingForm />
           </div>
         </div>
       </div>
@@ -163,3 +158,5 @@ export function HeroSection(): JSX.Element {
     </section>
   );
 }
+
+

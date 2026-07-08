@@ -68,6 +68,7 @@ CREATE INDEX IF NOT EXISTS idx_testimonials_is_active ON testimonials(is_active)
 CREATE INDEX IF NOT EXISTS idx_contact_submissions_status ON contact_submissions(status);
 CREATE INDEX IF NOT EXISTS idx_car_colors_car_model_id ON car_colors(car_model_id);
 CREATE INDEX IF NOT EXISTS idx_gallery_images_car_model_id ON gallery_images(car_model_id);
+CREATE INDEX IF NOT EXISTS idx_bookings_status ON bookings(status);
 
 -- Insert sample data for Apex GT
 INSERT INTO car_models (name, tagline, description, acceleration_0_60, top_speed, horsepower, price, image_url)
@@ -91,3 +92,19 @@ VALUES
   ('James Rodriguez', 'Professional Driver', 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&q=80', 'From the track to the highway, the Apex GT delivers pure driving joy. The handling is precise, the power is instant, and the comfort is exceptional.', 5),
   ('Emily Zhang', 'Business Owner', 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&q=80', 'Every detail of the Apex GT speaks to quality. The configurator let me create my perfect car, and the delivery experience was world-class.', 5)
 ON CONFLICT DO NOTHING;
+
+-- Bookings Table (for test drive and showroom appointments)
+CREATE TABLE IF NOT EXISTS bookings (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  email VARCHAR(255) NOT NULL,
+  phone VARCHAR(50),
+  preferred_date DATE NOT NULL,
+  preferred_time VARCHAR(20),
+  location VARCHAR(255) NOT NULL,
+  status VARCHAR(50) DEFAULT 'pending',
+  notes TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+

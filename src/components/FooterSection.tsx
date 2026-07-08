@@ -15,6 +15,8 @@ import {
   Youtube,
   Linkedin,
 } from "lucide-react";
+import { api, ApiError } from "@/lib/api";
+import { useToast } from "@/hooks/use-toast";
 
 export function FooterSection(): JSX.Element {
   const [isVisible, setIsVisible] = useState(false);
@@ -27,6 +29,7 @@ export function FooterSection(): JSX.Element {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const sectionRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -50,15 +53,28 @@ export function FooterSection(): JSX.Element {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Simulate form submission
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-
-    setIsSubmitting(false);
-    setIsSubmitted(true);
-    setFormData({ name: "", email: "", phone: "", message: "" });
-
-    // Reset success message after 5 seconds
-    setTimeout(() => setIsSubmitted(false), 5000);
+    try {
+      const response = await api.contact.create(formData);
+      setIsSubmitted(true);
+      setFormData({ name: "", email: "", phone: "", message: "" });
+      toast({
+        title: "Message Sent",
+        description: response.message,
+      });
+      setTimeout(() => setIsSubmitted(false), 5000);
+    } catch (error) {
+      const errMsg =
+        error instanceof ApiError
+          ? error.message
+          : "Failed to send message. Please try again.";
+      toast({
+        title: "Send Failed",
+        description: errMsg,
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (
@@ -297,10 +313,10 @@ export function FooterSection(): JSX.Element {
               <a href="/about" className="transition-colors hover:text-white">
                 About
               </a>
-              <a href="#" className="transition-colors hover:text-white">
+              <a href="/privacy" className="transition-colors hover:text-white">
                 Privacy Policy
               </a>
-              <a href="#" className="transition-colors hover:text-white">
+              <a href="/terms" className="transition-colors hover:text-white">
                 Terms of Service
               </a>
             </div>
@@ -310,4 +326,9 @@ export function FooterSection(): JSX.Element {
     </footer>
   );
 }
+
+
+
+
+
 
