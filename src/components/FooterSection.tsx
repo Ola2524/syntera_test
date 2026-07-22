@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
 import {
   Send,
   MapPin,
@@ -286,6 +288,162 @@ export function FooterSection(): JSX.Element {
         </div>
       </div>
 
+      {/* Separator between contact section and footer columns */}
+      <div className="mx-auto max-w-7xl px-6 sm:px-12 lg:px-24">
+        <Separator className="bg-white/10" />
+      </div>
+
+      {/* Multi-Column Footer */}
+      <div className="relative py-16 sm:py-20">
+        <div className="mx-auto max-w-7xl px-6 sm:px-12 lg:px-24">
+          <div
+            className={cn(
+              "grid gap-12 transition-all duration-700 delay-300 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8",
+              isVisible
+                ? "translate-y-0 opacity-100"
+                : "translate-y-8 opacity-0",
+            )}
+          >
+            {/* Brand Column */}
+            <div className="space-y-4">
+              <a
+                href="#top"
+                onClick={(e) => {
+                  e.preventDefault();
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }}
+                className="inline-block text-xl font-bold uppercase tracking-[0.2em] text-white transition-opacity duration-300 hover:opacity-80 sm:text-2xl"
+                aria-label="Apex GT - Back to top"
+              >
+                APEX GT
+              </a>
+              <p className="text-sm font-medium uppercase tracking-wider text-white/50">
+                Engineered Without Compromise
+              </p>
+              <p className="text-sm leading-relaxed text-white/60">
+                The pinnacle of automotive engineering. Precision-crafted for
+                those who demand the extraordinary.
+              </p>
+            </div>
+
+            {/* Navigation Column */}
+            <nav aria-label="Footer navigation">
+              <h3 className="mb-4 text-sm font-medium uppercase tracking-wider text-white">
+                Navigation
+              </h3>
+              <ul className="space-y-3">
+                {[
+                  { label: "Specs", href: "#specs", id: "specs" },
+                  { label: "Gallery", href: "#gallery", id: "gallery" },
+                  {
+                    label: "Configurator",
+                    href: "#configurator",
+                    id: "configurator",
+                  },
+                  {
+                    label: "Testimonials",
+                    href: "#testimonials",
+                    id: "testimonials",
+                  },
+                  { label: "Contact", href: "#contact", id: "contact" },
+                ].map((link) => (
+                  <li key={link.id}>
+                    <a
+                      href={link.href}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        const target = document.getElementById(link.id);
+                        if (target) {
+                          target.scrollIntoView({
+                            behavior: "smooth",
+                            block: "start",
+                          });
+                        }
+                      }}
+                      className="text-sm font-medium uppercase tracking-wider text-white/70 transition-colors duration-300 hover:text-white"
+                    >
+                      {link.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+
+            {/* Company Column */}
+            <nav aria-label="Company links">
+              <h3 className="mb-4 text-sm font-medium uppercase tracking-wider text-white">
+                Company
+              </h3>
+              <ul className="space-y-3">
+                {[
+                  { label: "About", href: "/about" },
+                  { label: "Privacy Policy", href: "/privacy" },
+                  { label: "Terms of Service", href: "/terms" },
+                  { label: "Careers", href: "/careers" },
+                ].map((link) => (
+                  <li key={link.label}>
+                    <a
+                      href={link.href}
+                      className="text-sm font-medium uppercase tracking-wider text-white/70 transition-colors duration-300 hover:text-white"
+                    >
+                      {link.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+
+            {/* Connect Column */}
+            <div>
+              <h3 className="mb-4 text-sm font-medium uppercase tracking-wider text-white">
+                Connect
+              </h3>
+              <p className="mb-4 text-sm text-white/60">
+                Follow our journey and stay updated on the latest releases.
+              </p>
+              <div className="flex flex-wrap gap-3">
+                {[
+                  {
+                    icon: Instagram,
+                    label: "Follow us on Instagram",
+                    href: "https://instagram.com",
+                  },
+                  {
+                    icon: Twitter,
+                    label: "Follow us on Twitter",
+                    href: "https://twitter.com",
+                  },
+                  {
+                    icon: Youtube,
+                    label: "Subscribe on YouTube",
+                    href: "https://youtube.com",
+                  },
+                  {
+                    icon: Linkedin,
+                    label: "Connect on LinkedIn",
+                    href: "https://linkedin.com",
+                  },
+                ].map((social) => {
+                  const Icon = social.icon;
+                  return (
+                    <a
+                      key={social.label}
+                      href={social.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex h-10 w-10 items-center justify-center border border-white/20 text-white/60 transition-all duration-300 hover:border-white/40 hover:text-white"
+                      aria-label={social.label}
+                    >
+                      <Icon className="h-5 w-5" aria-hidden="true" />
+                    </a>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Bottom Bar */}
       <div className="border-t border-white/10">
         <div className="mx-auto max-w-7xl px-6 py-6 sm:px-12 lg:px-24">
@@ -293,15 +451,21 @@ export function FooterSection(): JSX.Element {
             <p className="text-sm text-white/40">
               © 2025 Apex GT. All rights reserved.
             </p>
-            <div className="flex gap-6 text-sm text-white/40">
-              <a href="/about" className="transition-colors hover:text-white">
-                About
+            <div className="flex flex-wrap justify-center gap-6 text-sm text-white/40">
+              <a
+                href="/privacy"
+                className="transition-colors hover:text-white"
+              >
+                Privacy
               </a>
-              <a href="#" className="transition-colors hover:text-white">
-                Privacy Policy
+              <a href="/terms" className="transition-colors hover:text-white">
+                Terms
               </a>
-              <a href="#" className="transition-colors hover:text-white">
-                Terms of Service
+              <a
+                href="/cookies"
+                className="transition-colors hover:text-white"
+              >
+                Cookies
               </a>
             </div>
           </div>
@@ -310,4 +474,6 @@ export function FooterSection(): JSX.Element {
     </footer>
   );
 }
+
+
 
